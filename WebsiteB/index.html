@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Simple Post Creator</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            margin: 20px;
+            padding: 0;
+        }
+
+        h1 {
+            text-align: center;
+        }
+
+        form {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin: 10px 0 5px;
+        }
+
+        input[type="text"],
+        textarea {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 10px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            font-size: 1rem;
+        }
+
+        button {
+            display: inline-block;
+            padding: 10px 20px;
+            background-color: #007BFF;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 1rem;
+        }
+
+        button:hover {
+            background-color: #0056b3;
+        }
+
+        .post {
+            margin-bottom: 20px;
+            padding: 15px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            background-color: #f9f9f9;
+        }
+
+        .post h2 {
+            margin: 0 0 10px;
+            font-size: 1.5rem;
+        }
+
+        .post p {
+            margin: 0;
+            font-size: 1rem;
+        }
+    </style>
+</head>
+
+<body>
+    <h1>Add a New Post</h1>
+
+    <form id="postForm">
+        <label for="topic">Topic:</label>
+        <input type="text" id="topic" placeholder="Enter the topic..." required />
+
+        <label for="paragraph">Paragraph:</label>
+        <textarea id="paragraph" rows="5" placeholder="Enter your paragraph..." required></textarea>
+
+        <button type="submit">Add Post</button>
+    </form>
+
+    <div id="postsContainer">
+        <!-- New posts will be appended here -->
+    </div>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", () => {
+            const postForm = document.getElementById("postForm");
+            const postsContainer = document.getElementById("postsContainer");
+
+            postForm.addEventListener("submit", (event) => {
+                event.preventDefault(); // Prevent the form from refreshing the page
+
+                const topic = document.getElementById("topic").value.trim();
+                const paragraph = document.getElementById("paragraph").value.trim();
+
+                if (topic && paragraph) {
+                    // Create a new post element
+                    const post = document.createElement("div");
+                    post.classList.add("post");
+
+                    const postTitle = document.createElement("h2");
+                    postTitle.textContent = topic;
+
+                    const postParagraph = document.createElement("p");
+                    postParagraph.textContent = paragraph;
+
+                    // Append the title and paragraph to the post
+                    post.appendChild(postTitle);
+                    post.appendChild(postParagraph);
+
+                    // Append the post to the posts container
+                    postsContainer.appendChild(post);
+
+                    // Clear the form inputs
+                    postForm.reset();
+                } else {
+                    alert("Please fill out both fields!");
+                }
+            });
+        });
+
+        const GITHUB_TOKEN = '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';
+        const REPO_OWNER = 'itsnrb';
+        const REPO_NAME = 'futureWebsite';
+        const FILE_PATH = 'data.json';
+
+        async function updateData(newPost) {
+            const apiUrl = `https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/contents/${FILE_PATH}`;
+
+            // Get the current file data
+            const response = await fetch(apiUrl, {
+                headers: {
+                    Authorization: `token ${GITHUB_TOKEN}`,
+                },
+            });
+            const fileData = await response.json();
+            const currentContent = JSON.parse(atob(fileData.content)); // Decode base64 content
+
+            // Add the new post to the current data
+            currentContent.push(newPost);
+
+            // Encode the updated content to base64
+            const updatedContent = btoa(JSON.stringify(currentContent, null, 2));
+
+            // Push the update to GitHub
+            const updateResponse = await fetch(apiUrl, {
+                method: 'PUT',
+                headers: {
+                    Authorization: `token ${GITHUB_TOKEN}`,
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    message: 'Add new post',
+                    content: updatedContent,
+                    sha: fileData.sha, // Required to update the file
+                }),
+            });
+
+            if (updateResponse.ok) {
+                console.log('Data updated successfully!');
+            } else {
+                console.error('Failed to update data:', await updateResponse.text());
+            }
+        }
+
+        // Example usage
+        document.getElementById('postForm').addEventListener('submit', (e) => {
+            e.preventDefault();
+            const topic = document.getElementById('topic').value;
+            const paragraph = document.getElementById('paragraph').value;
+
+            updateData({ topic, paragraph });
+        });
+    </script>
+</body>
+
+</html>
