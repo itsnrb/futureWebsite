@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Future</title>
+    <style>
+        body {
+            margin: 0px;
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            background-image: url('GreenFutureWebsiteImage.jpg');
+            /* First background image */
+            background-size: cover;
+            background-position: center;
+            background-color: rgba(255, 255, 255, 1);
+            /* Fully white at start */
+            background-blend-mode: overlay;
+            transition: background-color 0.2s linear, background-image 1s ease-in-out;
+            position: relative;
+            /* Ensure pseudo-element is positioned relative to the body */
+            z-index: 0;
+        }
+
+        body::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.4);
+            /* Black overlay with 40% opacity */
+            z-index: -1;
+            /* Place it behind the content */
+            pointer-events: none;
+            /* Ensure it doesn't interfere with user interaction */
+        }
+
+        header {
+            position: relative;
+            height: 500px;
+            /* Reduced height */
+            width: 100%;
+            text-align: center;
+            justify-content: center;
+            align-items: center;
+            color: black;
+            display: flex;
+            z-index: 10;
+            font-family: Cursive;
+        }
+
+        section {
+            padding: 60px 20px 20px;
+        }
+
+        .section2 {
+            color: white;
+        }
+
+        .section3 {
+            color: red;
+        }
+
+        .extra-content {
+            margin: 20px 0;
+        }
+
+        .extra-content p {
+            color: black;
+            font-size: 1.2rem;
+            line-height: 2;
+        }
+    </style>
+</head>
+
+<body>
+    <header id="header" class="hed">
+        <h1>Welcome to Green Future</h1>
+    </header>
+
+    <section class="section" style="height: 100vh;">
+        <h1>Section 1</h1>
+        <p>This is the first section. Scroll down for the next section.</p>
+    </section>
+
+    <section class="section2" style="height: 100vh;">
+        <h1>Section 2</h1>
+        <p>This is the second section. Scroll down for the next section.</p>
+    </section>
+
+    <section class="section3" style="height: 100vh;">
+        <h1>Section 3</h1>
+        <p>This is the third section. Scroll down for the next section.</p>
+    </section>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", () => {
+            const body = document.body;
+
+            // List of background images
+            const backgroundImages = [
+                'SunIMG.jpg',         // First image
+                'BubblesIMG.jpg',     // Second image
+                'GreenFutureWebsiteImage.jpg' // Third image
+            ];
+
+            const totalSections = backgroundImages.length; // Number of sections equals the number of images
+            const sectionHeight = window.innerHeight;     // Each section takes up the full viewport height
+
+            // Set the body's height to match the total sections
+            body.style.height = `${totalSections * sectionHeight}px`;
+
+            // Scroll-based logic
+            window.addEventListener('scroll', () => {
+                const scrollPosition = window.scrollY;
+
+                // Determine the current section
+                const currentSection = Math.floor(scrollPosition / sectionHeight);
+
+                // Change the background image based on the section
+                if (currentSection < backgroundImages.length) {
+                    body.style.backgroundImage = `url('${backgroundImages[currentSection]}')`;
+                }
+
+                // Calculate transparency effect
+                const maxScroll = document.body.scrollHeight - window.innerHeight;
+                const ratio = Math.min(scrollPosition / maxScroll, 1); // Calculate the ratio (0 at top, 1 at bottom)
+
+                const red = Math.round(255 * (1 - ratio));
+                const green = Math.round(255 * (1 - ratio));
+                const blue = Math.round(255 * (1 - ratio));
+
+                // Set the background color dynamically
+                body.style.backgroundColor = `rgb(${red}, ${green}, ${blue})`;
+            });
+        });
+
+        // new logic with fetching, updateing content from Website B
+
+
+        document.addEventListener("DOMContentLoaded", () => {
+            const postsContainer = document.getElementById("postsContainer");
+
+            // Fetch content from Website B
+            fetch('../websiteB/data.json') // Fetch data.json instead of index.html
+                .then(response => response.json())
+                .then(posts => {
+                    posts.forEach(post => {
+                        const postElement = document.createElement("div");
+                        postElement.classList.add("post");
+
+                        const postTitle = document.createElement("h2");
+                        postTitle.textContent = post.topic;
+
+                        const postParagraph = document.createElement("p");
+                        postParagraph.textContent = post.paragraph;
+
+                        postElement.appendChild(postTitle);
+                        postElement.appendChild(postParagraph);
+                        postsContainer.appendChild(postElement);
+                    });
+                })
+                .catch(error => console.error('Error fetching posts:', error));
+        });
+
+    </script>
+</body>
+
+</html>
